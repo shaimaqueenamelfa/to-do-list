@@ -1,109 +1,217 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  FlatList,
+  Alert,
+} from "react-native";
+import tw from "twrnc";
+import { FontAwesome5, Foundation } from "@expo/vector-icons";
+import { Calendar } from "react-native-calendars";
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+const Explore = () => {
+  const [judul, setJudul] = useState("");
+  const [mapel, setMapel] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [daftarTugas, setDaftarTugas] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [idEdit, setIdEdit] = useState("");
+  const [showCalendar, setShowCalendar] = useState(false);
 
-export default function TabTwoScreen() {
+  const tambahTugas = () => {
+    if (!judul.trim() || !deadline.trim()) return;
+
+    const tugasBaru = {
+      id: Date.now().toString(),
+      title: judul.trim(),
+      category: mapel,
+      deadline: deadline,
+      completed: false,
+    };
+
+    setDaftarTugas([...daftarTugas, tugasBaru]);
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setJudul("");
+    setMapel("");
+    setDeadline("");
+    setEditMode(false);
+    setIdEdit("");
+  };
+
+  const editTugas = () => {
+    const update = daftarTugas.map((t) =>
+      t.id === idEdit
+        ? { ...t, title: judul.trim(), category: mapel, deadline }
+        : t
+    );
+    setDaftarTugas(update);
+    resetForm();
+  };
+
+  const mulaiEdit = (tugas) => {
+    setJudul(tugas.title);
+    setMapel(tugas.category);
+    setDeadline(tugas.deadline);
+    setEditMode(true);
+    setIdEdit(tugas.id);
+  };
+
+  const hapusTugas = (id) => {
+    Alert.alert("Hapus", "Yakin mau hapus tugas ini?", [
+      { text: "Batal", style: "cancel" },
+      {
+        text: "Hapus",
+        style: "destructive",
+        onPress: () =>
+          setDaftarTugas(daftarTugas.filter((item) => item.id !== id)),
+      },
+    ]);
+  };
+
+  const toggleSelesai = (id) => {
+    const update = daftarTugas.map((t) =>
+      t.id === id ? { ...t, completed: !t.completed } : t
+    );
+    setDaftarTugas(update);
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
-  );
-}
+    <SafeAreaView style={tw`flex-1 bg-gray-100`}>
+      <ScrollView>
+        <View style={tw`p-5 mt-10`}>
+          <Text style={tw`text-2xl font-bold mb-5`}>Tugasku</Text>
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
+          <TextInput
+            placeholder="Tugas apa?"
+            value={judul}
+            onChangeText={setJudul}
+            style={tw`border border-gray-400 rounded-lg px-4 py-2 bg-white mb-3`}
+          />
+          <TextInput
+            placeholder="Mapel?"
+            value={mapel}
+            onChangeText={setMapel}
+            style={tw`border border-gray-400 rounded-lg px-4 py-2 bg-white mb-3`}
+          />
+
+          {/* Input untuk Deadline */}
+          <View style={tw`flex-row items-center mb-4`}>
+            <TextInput
+              placeholder="Pilih Deadline"
+              value={deadline}
+              onChangeText={setDeadline}
+              style={tw`flex-1 border border-gray-400 rounded-lg px-4 py-2 bg-white`}
+              editable={false} // Menghindari edit langsung, hanya tombol kalender yang digunakan
+            />
+            <TouchableOpacity
+              onPress={() => setShowCalendar(!showCalendar)}
+              style={tw`ml-2 bg-blue-500 p-2 rounded-lg`}>
+              <FontAwesome5 name="calendar" size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Kalender */}
+          {showCalendar && (
+            <Calendar
+              onDayPress={(day) => {
+                setDeadline(day.dateString);
+                setShowCalendar(false); // Tutup kalender setelah memilih tanggal
+              }}
+              markedDates={{
+                [deadline]: {
+                  selected: true,
+                  marked: true,
+                  selectedColor: "blue",
+                },
+              }}
+              theme={{
+                selectedDayBackgroundColor: "#3b82f6",
+                todayTextColor: "#3b82f6",
+                arrowColor: "#3b82f6",
+              }}
+              style={tw`mb-4 rounded-lg shadow-sm`}
+            />
+          )}
+
+          <TouchableOpacity
+            style={tw`bg-blue-500 py-2 rounded-lg`}
+            onPress={editMode ? editTugas : tambahTugas}>
+            <Text style={tw`text-white text-center font-semibold`}>
+              {editMode ? "Update" : "Tambah"}
+            </Text>
+          </TouchableOpacity>
+
+          <Text style={tw`mt-6 mb-3 text-gray-600 font-semibold text-sm`}>
+            Daftar Tugas
+          </Text>
+
+          {daftarTugas.length === 0 ? (
+            <Text style={tw`text-center text-gray-400 mt-4`}>
+              Tidak ada tugas
+            </Text>
+          ) : (
+            <FlatList
+              scrollEnabled={false}
+              data={daftarTugas}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View
+                  style={tw`bg-white flex-row items-center justify-between p-3 rounded-lg mb-3 shadow-sm`}>
+                  <TouchableOpacity onPress={() => toggleSelesai(item.id)}>
+                    <View
+                      style={tw`w-5 h-5 rounded-full border-2 ${
+                        item.completed ? "bg-green-500" : "bg-white"
+                      } border-gray-400 justify-center items-center`}>
+                      {item.completed && (
+                        <View style={tw`w-2.5 h-2.5 bg-white rounded-full`} />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+
+                  <View style={tw`flex-1 ml-3`}>
+                    <Text
+                      style={tw`${
+                        item.completed
+                          ? "line-through text-gray-400"
+                          : "text-black"
+                      }`}>
+                      {item.title}
+                    </Text>
+                    <Text style={tw`text-xs text-gray-500`}>
+                      Mapel: {item.category}
+                    </Text>
+                    <Text style={tw`text-xs text-red-500`}>
+                      Deadline: {item.deadline}
+                    </Text>
+                  </View>
+
+                  <View style={tw`flex-row gap-2`}>
+                    <TouchableOpacity
+                      onPress={() => mulaiEdit(item)}
+                      style={tw`bg-yellow-500 px-2 py-1 rounded-lg`}>
+                      <Foundation name="pencil" size={16} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => hapusTugas(item.id)}
+                      style={tw`bg-red-500 px-2 py-1 rounded-lg`}>
+                      <FontAwesome5 name="trash" size={16} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            />
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+export default Explore;

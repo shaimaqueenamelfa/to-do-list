@@ -11,12 +11,9 @@ import {
 import tw from "twrnc";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FontAwesome5, Foundation } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
 
 const Index = () => {
   const [task, setTask] = useState("");
-  const [category, setCategory] = useState("PR");
-  const [deadline, setDeadline] = useState("");
   const [list, setList] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState("");
@@ -49,20 +46,16 @@ const Index = () => {
   };
 
   const addTask = () => {
-    if (task.trim() === "" || deadline.trim() === "") return;
+    if (task.trim() === "") return;
 
     const newTask = {
       id: Date.now().toString(),
       title: task.trim(),
-      category: category,
-      deadline: deadline,
       completed: false,
     };
 
     setList([...list, newTask]);
     setTask("");
-    setCategory("PR");
-    setDeadline("");
   };
 
   const handleDelete = (id) => {
@@ -70,26 +63,20 @@ const Index = () => {
     setList(filtered);
   };
 
+  const startEdit = (item) => {
+    setTask(item.title);
+    setIsEditing(true);
+    setEditId(item.id);
+  };
+
   const handleEdit = () => {
     const updated = list.map((item) =>
-      item.id === editId
-        ? { ...item, title: task.trim(), category, deadline }
-        : item
+      item.id === editId ? { ...item, title: task.trim() } : item
     );
     setList(updated);
     setTask("");
-    setCategory("PR");
-    setDeadline("");
     setIsEditing(false);
     setEditId("");
-  };
-
-  const startEdit = (item) => {
-    setTask(item.title);
-    setCategory(item.category);
-    setDeadline(item.deadline);
-    setIsEditing(true);
-    setEditId(item.id);
   };
 
   const completeTask = async (id) => {
@@ -108,11 +95,12 @@ const Index = () => {
     <SafeAreaView style={tw`flex-1 bg-gray-100`}>
       <ScrollView>
         <View style={tw`mx-5 mt-10`}>
-          <Text style={tw`font-bold text-2xl text-left mb-6`}>Wahahaha</Text>
+          <Text style={tw`font-bold text-2xl text-left mb-6`}>CTTN</Text>
 
+          {/* Input tugas */}
           <View style={tw`flex-row items-center gap-2 mb-4`}>
             <TextInput
-              placeholder="Tambahkan tugas"
+              placeholder="Tugas nya apa?"
               value={task}
               onChangeText={setTask}
               style={tw`flex-1 border border-gray-400 rounded-lg px-4 py-2 bg-white text-black`}
@@ -126,29 +114,11 @@ const Index = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Dropdown Kategori */}
-          <View style={tw`border border-gray-400 rounded-lg bg-white mb-4`}>
-            <Picker
-              selectedValue={category}
-              onValueChange={(itemValue) => setCategory(itemValue)}>
-              <Picker.Item label="PR" value="PR" />
-              <Picker.Item label="Proyek" value="Proyek" />
-              <Picker.Item label="Ujian" value="Ujian" />
-            </Picker>
-          </View>
-
-          {/* Input Deadline */}
-          <TextInput
-            placeholder="Deadline (misal: 2025-04-20)"
-            value={deadline}
-            onChangeText={setDeadline}
-            style={tw`border border-gray-400 rounded-lg px-4 py-2 bg-white text-black mb-4`}
-          />
-
           <Text style={tw`font-bold text-gray-500 text-sm text-left mb-6`}>
             To do
           </Text>
 
+          {/* Daftar tugas */}
           <FlatList
             data={list}
             keyExtractor={(item) => item.id}
@@ -167,6 +137,7 @@ const Index = () => {
                   </View>
                 </TouchableOpacity>
 
+                {/* Judul tugas */}
                 <View style={tw`flex-1 ml-2`}>
                   <Text
                     style={tw`text-base ${
@@ -176,19 +147,16 @@ const Index = () => {
                     }`}>
                     {item.title}
                   </Text>
-                  <Text style={tw`text-xs text-gray-500`}>
-                    Kategori: {item.category}
-                  </Text>
-                  <Text style={tw`text-xs text-red-500`}>
-                    Deadline: {item.deadline}
-                  </Text>
                 </View>
 
+                {/* Tombol edit */}
                 <TouchableOpacity
                   onPress={() => startEdit(item)}
                   style={tw`bg-yellow-500 px-3 py-1 rounded-lg mr-2`}>
                   <Foundation name="pencil" size={16} color="#fff" />
                 </TouchableOpacity>
+
+                {/* Tombol hapus */}
                 <TouchableOpacity
                   onPress={() => handleDelete(item.id)}
                   style={tw`bg-red-500 px-3 py-1 rounded-lg`}>
