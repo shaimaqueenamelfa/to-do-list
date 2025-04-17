@@ -108,7 +108,7 @@ const Index = () => {
     <SafeAreaView style={tw`flex-1 bg-gray-100`}>
       <ScrollView>
         <View style={tw`mx-5 mt-10`}>
-          <Text style={tw`font-bold text-2xl text-left mb-6`}>Wohooo</Text>
+          <Text style={tw`font-bold text-2xl text-left mb-6`}>Wahahaha</Text>
 
           <View style={tw`flex-row items-center gap-2 mb-4`}>
             <TextInput
